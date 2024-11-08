@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { currentPlaylistState } from "@/atoms/playlistAtom";
+import { Player } from "@/components/Player";
+import { PlaylistSearch } from "@/components/PlaylistSearch";
+import { PlaylistSelector } from "@/components/PlaylistSelector";
+import { SongInfo } from "@/components/SongInfo";
+import { Button } from "@/components/ui/button";
+import { useSpotify } from "@/hooks/useSpotify";
+import { useRecoilValue } from "recoil";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { isAuthenticated, login, user } = useSpotify();
+  const currentPlaylist = useRecoilValue(currentPlaylistState);
+
+  if (!isAuthenticated) {
+    return (
+      <main className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-4xl font-bold text-center mb-8">
+          Spotify Song Sorter
+        </h1>
+        <Button onClick={login} size="lg">
+          Login with Spotify
+        </Button>
+      </main>
+    );
+  }
+
+  if (!currentPlaylist) {
+    return <PlaylistSelector />;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <main className="container mx-auto p-4 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold">Spotify Song Sorter</h1>
+        <p className="text-muted-foreground">Welcome, {user?.display_name}</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      <div className="max-w-2xl mx-auto space-y-6">
+        <SongInfo />
+        <Player />
+        <PlaylistSearch />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </main>
+  );
 }
 
-export default App
+export default App;
