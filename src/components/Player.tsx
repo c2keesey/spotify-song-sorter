@@ -1,4 +1,4 @@
-import { currentPlaylistSelector } from "@/atoms/playlistSelectors";
+import { currentPlaylistState } from "@/atoms/playlistAtom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayback } from "@/hooks/usePlayback";
@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 
 export function Player() {
-  const currentPlaylist = useRecoilValue(currentPlaylistSelector);
+  const currentPlaylist = useRecoilValue(currentPlaylistState);
   const {
     isPlaying,
     track,

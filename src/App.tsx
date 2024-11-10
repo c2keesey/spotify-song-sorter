@@ -1,4 +1,4 @@
-import { currentPlaylistSelector } from "@/atoms/playlistSelectors";
+import { currentPlaylistIdState } from "@/atoms/playlistAtom";
 import { Header } from "@/components/Header";
 import { Player } from "@/components/Player";
 import { PlaylistSelector } from "@/components/PlaylistSelector";
@@ -9,7 +9,7 @@ import { useRecoilValue } from "recoil";
 
 function App() {
   const { isAuthenticated, login, logout, user } = useSpotify();
-  const currentPlaylist = useRecoilValue(currentPlaylistSelector);
+  const currentPlaylistId = useRecoilValue(currentPlaylistIdState);
   const { isLoading: isLoadingPlaylists } = useGetAllPlaylists();
 
   if (!isAuthenticated) {
@@ -29,7 +29,7 @@ function App() {
     return <div>Loading playlists...</div>;
   }
 
-  if (!currentPlaylist) {
+  if (!currentPlaylistId) {
     return <PlaylistSelector />;
   }
 
