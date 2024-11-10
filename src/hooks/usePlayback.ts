@@ -9,6 +9,7 @@ interface PlaybackState {
 }
 
 export function usePlayback() {
+  const [initialLoad, setInitialLoad] = useState(true);
   const [playbackState, setPlaybackState] = useState<PlaybackState>({
     isPlaying: false,
     track: null,
@@ -22,29 +23,48 @@ export function usePlayback() {
 
       if (state.body) {
         setPlaybackState({
-          isPlaying: state.body.is_playing,
+          isPlaying: initialLoad ? false : state.body.is_playing,
           track: state.body.item as SpotifyApi.TrackObjectFull,
           position: state.body.progress_ms || 0,
           duration: state.body.item?.duration_ms || 0,
         });
+
+        if (initialLoad) {
+          setInitialLoad(false);
+        }
       }
     } catch (error) {
       console.error("Playback state error:", error);
     }
-  }, []);
+  }, [initialLoad]);
 
   const togglePlayback = useCallback(async () => {
+    console.log("togglePlayback", playbackState.isPlaying);
     try {
       if (playbackState.isPlaying) {
         await pause();
       } else {
-        await play();
+        if (!playbackState.track) {
+          const currentPlaylistUri = localStorage.getItem(
+            "spotify_current_playlist_uri"
+          );
+          if (currentPlaylistUri) {
+            await play({
+              context_uri: currentPlaylistUri,
+              offset: { position: 0 },
+            });
+          } else {
+            await play(); // fallback to resume if no playlist context
+          }
+        } else {
+          await play(); // resume current track
+        }
       }
       await updatePlaybackState();
     } catch (error) {
       console.error("Playback control error:", error);
     }
-  }, [playbackState.isPlaying, updatePlaybackState]);
+  }, [playbackState.isPlaying, playbackState.track, updatePlaybackState]);
 
   const seek = useCallback(
     async (position: number) => {

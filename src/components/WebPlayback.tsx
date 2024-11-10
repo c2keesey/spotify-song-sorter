@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { PlayerContext } from "@/contexts/PlayerContext";
+import { useEffect, useState } from "react";
 
 export function WebPlayback({ children }: { children: React.ReactNode }) {
   const [player, setPlayer] = useState<Spotify.Player | null>(null);

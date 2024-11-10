@@ -1,6 +1,7 @@
 import {
-  currentPlaylistState,
-  playlistTracksState,
+  currentPlaylistIdState,
+  playlistsState,
+  PlaylistWithTracks,
 } from "@/atoms/playlistAtom";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,75 +19,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PlaylistItem } from "@/types/spotify";
-import SPOTIFY_API, {
-  getPlaylistTracks,
-  getUserPlaylists,
-  waitForSpotifyDevice,
-} from "@/utils/spotify";
-import { useEffect, useState } from "react";
-import { useSetRecoilState } from "recoil";
+
+import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
+import SPOTIFY_API, { waitForSpotifyDevice } from "@/utils/spotify";
+import { useState } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 export function PlaylistSelector() {
   const [open, setOpen] = useState(true);
-  const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const setCurrentPlaylist = useSetRecoilState(currentPlaylistState);
-  const setPlaylistTracks = useSetRecoilState(playlistTracksState);
+  const playlists = useRecoilValue(playlistsState);
+  const setCurrentPlaylistId = useSetRecoilState(currentPlaylistIdState);
+  const { isLoading, error } = useGetAllPlaylists();
 
-  useEffect(() => {
-    const fetchPlaylists = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const spotifyPlaylists = await getUserPlaylists();
-
-        console.log("Raw response:", spotifyPlaylists);
-
-        if (!spotifyPlaylists || !Array.isArray(spotifyPlaylists)) {
-          throw new Error("Invalid playlist data received");
-        }
-
-        const formattedPlaylists: PlaylistItem[] = spotifyPlaylists.map(
-          (playlist) => ({
-            id: playlist.id,
-            name: playlist.name,
-            imageUrl: playlist.images?.[0]?.url,
-            description: playlist.description || undefined,
-            owner: {
-              id: playlist.owner.id,
-              displayName: playlist.owner.display_name || "",
-            },
-            tracks: {
-              total: playlist.tracks.total,
-            },
-          })
-        );
-
-        console.log("Formatted playlists:", formattedPlaylists);
-        setPlaylists(formattedPlaylists);
-      } catch (err) {
-        console.error("Error fetching playlists:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load playlists"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPlaylists();
-  }, []);
-
-  const handleSelectPlaylist = async (playlist: PlaylistItem) => {
+  const handleSelectPlaylist = async (playlist: PlaylistWithTracks) => {
     try {
-      const tracks = await getPlaylistTracks(playlist.id);
-      setPlaylistTracks(tracks);
-      setCurrentPlaylist(playlist);
-
-      // Wait for device to be ready
-      if (tracks.length > 0 && tracks[0].track) {
+      setCurrentPlaylistId(playlist.id);
+      // Handle Spotify playback
+      if (playlist.num_tracks > 0) {
         const deviceId = await waitForSpotifyDevice();
         await SPOTIFY_API.play({
           device_id: deviceId,
@@ -95,7 +44,7 @@ export function PlaylistSelector() {
         });
       }
     } catch (error) {
-      console.error("Error loading playlist tracks:", error);
+      console.error("Error starting playlist playback:", error);
     }
     setOpen(false);
   };
@@ -141,7 +90,7 @@ export function PlaylistSelector() {
                         <div className="flex flex-col">
                           <span className="font-medium">{playlist.name}</span>
                           <span className="text-sm text-muted-foreground">
-                            {playlist.tracks?.total} tracks
+                            {playlist.num_tracks} tracks
                           </span>
                         </div>
                       </div>

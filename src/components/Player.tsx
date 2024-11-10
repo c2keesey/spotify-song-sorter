@@ -1,7 +1,4 @@
-import {
-  currentPlaylistState,
-  playlistTracksState,
-} from "@/atoms/playlistAtom";
+import { currentPlaylistSelector } from "@/atoms/playlistSelectors";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayback } from "@/hooks/usePlayback";
@@ -15,8 +12,7 @@ import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 
 export function Player() {
-  const currentPlaylist = useRecoilValue(currentPlaylistState);
-  const playlistTracks = useRecoilValue(playlistTracksState);
+  const currentPlaylist = useRecoilValue(currentPlaylistSelector);
   const {
     isPlaying,
     track,
@@ -27,6 +23,13 @@ export function Player() {
     skipToNext,
     skipToPrevious,
   } = usePlayback();
+
+  // Ensure playback is paused when component mounts
+  useEffect(() => {
+    if (isPlaying) {
+      togglePlayback();
+    }
+  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -82,11 +85,11 @@ export function Player() {
           </div>
         </div>
         <div className="text-sm text-muted-foreground">
-          {playlistTracks.length > 0 && (
+          {currentPlaylist.num_tracks > 0 && (
             <span>
               Track{" "}
-              {playlistTracks.findIndex((t) => t.track?.id === track?.id) + 1}{" "}
-              of {playlistTracks.length}
+              {currentPlaylist.all_tracks.findIndex((t) => t === track?.id) + 1}{" "}
+              of {currentPlaylist.num_tracks}
             </span>
           )}
         </div>
