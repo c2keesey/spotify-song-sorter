@@ -1,10 +1,9 @@
-import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
 import {
   getAuthUrl,
   getCurrentUser,
   handleAuthCallback,
   refreshAccessToken,
-} from "@/utils/spotify";
+} from "@/spotify_utils";
 import { useEffect, useState } from "react";
 import { SpotifyContext } from "./SpotifyContext";
 

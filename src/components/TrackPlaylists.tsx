@@ -9,13 +9,35 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRecoilValue } from "recoil";
+import { PlaylistCard } from "./PlaylistCard";
+import { playbackState } from "@/atoms/playbackAtom";
+import { useRemoveTrackFromPlaylist } from "@/hooks/useAddTrackToPlaylist";
+import { useState } from "react";
 
 export function TrackPlaylists() {
   const playlists = useRecoilValue(trackPlaylistsSelector);
+  const currentTrack = useRecoilValue(playbackState).track;
+  const removeTrackFromPlaylist = useRemoveTrackFromPlaylist();
+  const [removingFromPlaylist, setRemovingFromPlaylist] = useState<
+    string | null
+  >(null);
 
   if (playlists.length === 0) {
     return null;
   }
+
+  const handleRemoveFromPlaylist = async (playlistId: string) => {
+    if (!currentTrack) return;
+
+    try {
+      setRemovingFromPlaylist(playlistId);
+      await removeTrackFromPlaylist(playlistId, currentTrack.id);
+    } catch (error) {
+      console.error("Failed to remove track from playlist:", error);
+    } finally {
+      setRemovingFromPlaylist(null);
+    }
+  };
 
   return (
     <Card className="h-full overflow-auto">
@@ -30,25 +52,16 @@ export function TrackPlaylists() {
         <ScrollArea className="h-[calc(100%-7rem)]">
           <div className="space-y-2 pr-4">
             {playlists.map((playlist) => (
-              <div
+              <PlaylistCard
                 key={playlist.id}
-                className="flex items-center gap-3 rounded-lg border p-2"
-              >
-                {playlist.imageUrl && (
-                  <img
-                    src={playlist.imageUrl}
-                    alt={playlist.name}
-                    className="h-12 w-12 rounded-md object-cover"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium truncate">{playlist.name}</h4>
-                  <p className="text-sm text-muted-foreground truncate">
-                    By {playlist.owner.displayName}
-                  </p>
-                </div>
-                <Badge variant="secondary">{playlist.num_tracks} tracks</Badge>
-              </div>
+                playlist={playlist}
+                onClick={() => handleRemoveFromPlaylist(playlist.id)}
+                actions={
+                  <Badge variant="secondary">
+                    {playlist.num_tracks} tracks
+                  </Badge>
+                }
+              />
             ))}
           </div>
         </ScrollArea>

@@ -1,41 +1,56 @@
+import { playbackState } from "@/atoms/playbackAtom";
 import { otherPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAddTrackToPlaylist } from "@/hooks/useAddTrackToPlaylist";
+import { useState } from "react";
 import { useRecoilValue } from "recoil";
+import { PlaylistCard } from "./PlaylistCard";
 import { Badge } from "./ui/badge";
 
-export function OtherPlaylists() {
+interface Props {
+  className?: string;
+}
+
+export function OtherPlaylists({ className }: Props) {
   const playlists = useRecoilValue(otherPlaylistsSelector);
+  const currentTrack = useRecoilValue(playbackState).track;
+  const addTrackToPlaylist = useAddTrackToPlaylist();
+  const [addingToPlaylist, setAddingToPlaylist] = useState<string | null>(null);
 
   if (playlists.length === 0) {
     return null;
   }
 
+  const handleAddToPlaylist = async (playlistId: string) => {
+    if (!currentTrack) return;
+
+    try {
+      setAddingToPlaylist(playlistId);
+      await addTrackToPlaylist(playlistId, currentTrack.id);
+    } catch (error) {
+      console.error("Failed to add track to playlist:", error);
+    } finally {
+      setAddingToPlaylist(null);
+    }
+  };
+
   return (
-    <Card className="h-full flex flex-col flex-1 overflow-auto">
-      <CardContent className="p-0 flex-1 min-h-0">
-        <ScrollArea className="h-full">
+    <Card className={className}>
+      <CardContent className="p-0">
+        <ScrollArea className="h-full [&_[data-radix-scroll-area-scrollbar]]:!bg-muted [&_[data-radix-scroll-area-thumb]]:!bg-muted-foreground">
           <div className="space-y-2 p-6">
             {playlists.map((playlist) => (
-              <div
+              <PlaylistCard
                 key={playlist.id}
-                className="flex items-center gap-3 rounded-lg border p-2"
-              >
-                {playlist.imageUrl && (
-                  <img
-                    src={playlist.imageUrl}
-                    alt={playlist.name}
-                    className="h-12 w-12 rounded-md object-cover"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium truncate">{playlist.name}</h4>
-                  <p className="text-sm text-muted-foreground truncate">
-                    By {playlist.owner.displayName}
-                  </p>
-                </div>
-                <Badge variant="secondary">{playlist.num_tracks} tracks</Badge>
-              </div>
+                playlist={playlist}
+                onClick={() => handleAddToPlaylist(playlist.id)}
+                actions={
+                  <Badge variant="secondary" className="shrink-0">
+                    {playlist.num_tracks} tracks
+                  </Badge>
+                }
+              />
             ))}
           </div>
         </ScrollArea>

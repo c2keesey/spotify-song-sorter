@@ -1,6 +1,6 @@
 import { playlistsState } from "@/atoms/playlistAtom";
 import { useSpotify } from "@/hooks/useSpotify";
-import { getPlaylistTracks, getUserPlaylists } from "@/utils/spotify";
+import { getPlaylistTracks, getUserPlaylists } from "@/spotify_utils";
 import { useEffect, useState } from "react";
 import { useSetRecoilState } from "recoil";
 

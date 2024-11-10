@@ -1,5 +1,5 @@
 import { playbackState } from "@/atoms/playbackAtom";
-import SPOTIFY_API, { pause, play } from "@/utils/spotify";
+import { SPOTIFY_API, pause, play, seek as seekTrack } from "@/spotify_utils";
 import { useCallback, useEffect } from "react";
 import { useRecoilState } from "recoil";
 
@@ -53,7 +53,7 @@ export function usePlayback() {
   const seek = useCallback(
     async (position: number) => {
       try {
-        await seek(position);
+        await seekTrack(position);
         await updatePlaybackState();
       } catch (error) {
         console.error("Seek error:", error);

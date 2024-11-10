@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
-import SPOTIFY_API, { waitForSpotifyDevice } from "@/utils/spotify";
+import { SPOTIFY_API, waitForSpotifyDevice } from "@/spotify_utils";
 import { useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
