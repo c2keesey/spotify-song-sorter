@@ -1,34 +1,21 @@
-import { trackPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { otherPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRecoilValue } from "recoil";
+import { Badge } from "./ui/badge";
 
-export function TrackPlaylists() {
-  const playlists = useRecoilValue(trackPlaylistsSelector);
+export function OtherPlaylists() {
+  const playlists = useRecoilValue(otherPlaylistsSelector);
 
   if (playlists.length === 0) {
     return null;
   }
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardHeader>
-        <CardTitle className="text-lg">In Your Playlists</CardTitle>
-        <CardDescription>
-          This track appears in {playlists.length} playlist
-          {playlists.length === 1 ? "" : "s"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[calc(100%-7rem)]">
-          <div className="space-y-2 pr-4">
+    <Card className="h-full flex flex-col flex-1 overflow-auto">
+      <CardContent className="p-0 flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="space-y-2 p-6">
             {playlists.map((playlist) => (
               <div
                 key={playlist.id}

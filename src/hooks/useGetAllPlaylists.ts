@@ -11,7 +11,6 @@ export function useGetAllPlaylists() {
   const { isAuthenticated } = useSpotify();
 
   useEffect(() => {
-    console.log("isAuthenticated", isAuthenticated);
     if (!isAuthenticated) {
       setIsLoading(false);
       return;

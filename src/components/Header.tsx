@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ user, logout }: HeaderProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between mb-4">
       <h1 className="text-4xl font-bold">Spotify Song Sorter</h1>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

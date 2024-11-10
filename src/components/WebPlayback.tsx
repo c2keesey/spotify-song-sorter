@@ -42,7 +42,6 @@ export function WebPlayback({ children }: { children: React.ReactNode }) {
 
       // Ready
       player.addListener("ready", ({ device_id }) => {
-        console.log("Ready with Device ID", device_id);
         localStorage.setItem("spotify_device_id", device_id);
         setDeviceId(device_id);
         setIsReady(true);
@@ -66,7 +65,6 @@ export function WebPlayback({ children }: { children: React.ReactNode }) {
 
       // Not Ready
       player.addListener("not_ready", ({ device_id }) => {
-        console.log("Device ID has gone offline", device_id);
         localStorage.removeItem("spotify_device_id");
       });
 

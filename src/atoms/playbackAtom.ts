@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 
-interface PlaybackState {
+export interface PlaybackState {
   isPlaying: boolean;
   track: SpotifyApi.TrackObjectFull | null;
   position: number;

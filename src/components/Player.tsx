@@ -1,3 +1,4 @@
+import { playbackState } from "@/atoms/playbackAtom";
 import { currentPlaylistState } from "@/atoms/playlistAtom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -13,23 +14,10 @@ import { useRecoilValue } from "recoil";
 
 export function Player() {
   const currentPlaylist = useRecoilValue(currentPlaylistState);
-  const {
-    isPlaying,
-    track,
-    position,
-    duration,
-    togglePlayback,
-    seek,
-    skipToNext,
-    skipToPrevious,
-  } = usePlayback();
+  const playback = useRecoilValue(playbackState);
+  const { togglePlayback, seek, skipToNext, skipToPrevious } = usePlayback();
 
-  // Ensure playback is paused when component mounts
-  useEffect(() => {
-    if (isPlaying) {
-      togglePlayback();
-    }
-  }, []);
+  const { isPlaying, track, position, duration } = playback;
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -65,80 +53,83 @@ export function Player() {
   }
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {track?.album.images[0] && (
-            <img
-              src={track.album.images[0].url}
-              alt={track.album.name}
-              className="w-16 h-16 rounded-md"
-            />
-          )}
-          <div>
-            <h3 className="font-semibold">
-              {track?.name || "No track playing"}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {track?.artists.map((a) => a.name).join(", ")}
-            </p>
+    <div className="space-y-4 flex-shrink-0">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {track?.album.images[0] && (
+              <img
+                src={track.album.images[0].url}
+                alt={track.album.name}
+                className="w-16 h-16 rounded-md"
+              />
+            )}
+            <div>
+              <h3 className="font-semibold">
+                {track?.name || "No track playing"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {track?.artists.map((a) => a.name).join(", ")}
+              </p>
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {currentPlaylist.num_tracks > 0 && (
+              <span>
+                Track{" "}
+                {currentPlaylist.all_tracks.findIndex((t) => t === track?.id) +
+                  1}{" "}
+                of {currentPlaylist.num_tracks}
+              </span>
+            )}
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">
-          {currentPlaylist.num_tracks > 0 && (
-            <span>
-              Track{" "}
-              {currentPlaylist.all_tracks.findIndex((t) => t === track?.id) + 1}{" "}
-              of {currentPlaylist.num_tracks}
-            </span>
-          )}
+
+        <div className="space-y-2">
+          <Slider
+            value={[position]}
+            max={duration}
+            step={1000}
+            onValueChange={([value]) => seek(value)}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{formatTime(position)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Slider
-          value={[position]}
-          max={duration}
-          step={1000}
-          onValueChange={([value]) => seek(value)}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{formatTime(position)}</span>
-          <span>{formatTime(duration)}</span>
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={skipToPrevious}
+            aria-label="Previous track"
+          >
+            <CaretLeftIcon className="h-4 w-4" />
+          </Button>
+
+          <Button
+            size="icon"
+            onClick={togglePlayback}
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <PauseIcon className="h-4 w-4" />
+            ) : (
+              <PlayIcon className="h-4 w-4" />
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={skipToNext}
+            aria-label="Next track"
+          >
+            <CaretRightIcon className="h-4 w-4" />
+          </Button>
         </div>
-      </div>
-
-      <div className="flex items-center justify-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={skipToPrevious}
-          aria-label="Previous track"
-        >
-          <CaretLeftIcon className="h-4 w-4" />
-        </Button>
-
-        <Button
-          size="icon"
-          onClick={togglePlayback}
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? (
-            <PauseIcon className="h-4 w-4" />
-          ) : (
-            <PlayIcon className="h-4 w-4" />
-          )}
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={skipToNext}
-          aria-label="Next track"
-        >
-          <CaretRightIcon className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

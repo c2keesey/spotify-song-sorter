@@ -1,50 +1,34 @@
+import { playbackState } from "@/atoms/playbackAtom";
 import SPOTIFY_API, { pause, play } from "@/utils/spotify";
-import { useCallback, useEffect, useState } from "react";
-
-interface PlaybackState {
-  isPlaying: boolean;
-  track: SpotifyApi.TrackObjectFull | null;
-  position: number;
-  duration: number;
-}
+import { useCallback, useEffect } from "react";
+import { useRecoilState } from "recoil";
 
 export function usePlayback() {
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [playbackState, setPlaybackState] = useState<PlaybackState>({
-    isPlaying: false,
-    track: null,
-    position: 0,
-    duration: 0,
-  });
+  const [playback, setPlayback] = useRecoilState(playbackState);
 
   const updatePlaybackState = useCallback(async () => {
     try {
       const state = await SPOTIFY_API.getMyCurrentPlaybackState();
 
       if (state.body) {
-        setPlaybackState({
-          isPlaying: initialLoad ? false : state.body.is_playing,
+        setPlayback({
+          isPlaying: state.body.is_playing,
           track: state.body.item as SpotifyApi.TrackObjectFull,
           position: state.body.progress_ms || 0,
           duration: state.body.item?.duration_ms || 0,
         });
-
-        if (initialLoad) {
-          setInitialLoad(false);
-        }
       }
     } catch (error) {
       console.error("Playback state error:", error);
     }
-  }, [initialLoad]);
+  }, [setPlayback]);
 
   const togglePlayback = useCallback(async () => {
-    console.log("togglePlayback", playbackState.isPlaying);
     try {
-      if (playbackState.isPlaying) {
+      if (playback.isPlaying) {
         await pause();
       } else {
-        if (!playbackState.track) {
+        if (!playback.track) {
           const currentPlaylistUri = localStorage.getItem(
             "spotify_current_playlist_uri"
           );
@@ -64,7 +48,7 @@ export function usePlayback() {
     } catch (error) {
       console.error("Playback control error:", error);
     }
-  }, [playbackState.isPlaying, playbackState.track, updatePlaybackState]);
+  }, [playback.isPlaying, playback.track, updatePlaybackState]);
 
   const seek = useCallback(
     async (position: number) => {
@@ -112,7 +96,7 @@ export function usePlayback() {
     const checkForTrackChange = setInterval(async () => {
       try {
         const state = await SPOTIFY_API.getMyCurrentPlaybackState();
-        if (state.body?.item?.id !== playbackState.track?.id) {
+        if (state.body?.item?.id !== playback.track?.id) {
           updatePlaybackState();
         }
       } catch (error) {
@@ -121,10 +105,10 @@ export function usePlayback() {
     }, 2000);
 
     return () => clearInterval(checkForTrackChange);
-  }, [playbackState.track?.id, updatePlaybackState]);
+  }, [playback.track?.id, updatePlaybackState]);
 
   return {
-    ...playbackState,
+    ...playback,
     togglePlayback,
     seek,
     skipToNext,

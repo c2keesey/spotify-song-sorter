@@ -40,7 +40,6 @@ export const getAuthUrl = () => {
   ];
 
   const authUrl = SPOTIFY_API.createAuthorizeURL(scopes, state);
-  console.log("Generated auth URL with state:", state); // Debug log
   return authUrl;
 };
 
@@ -50,7 +49,6 @@ export const handleAuthCallback = async (
 ) => {
   // Verify state
   const storedState = localStorage.getItem("spotify_auth_state");
-  console.log("Comparing states:", { received: state, stored: storedState }); // Debug log
 
   if (!state || !storedState || state !== storedState) {
     console.error("State mismatch:", { received: state, stored: storedState }); // Debug log
