@@ -13,7 +13,7 @@ export const trackPlaylistsSelector = selector({
 
     return playlists.filter(
       (playlist) =>
-        playlist.all_tracks.includes(currentTrack.id) &&
+        playlist.all_tracks.some((track) => track.id === currentTrack.id) &&
         !removedIds.includes(playlist.id)
     );
   },
@@ -30,7 +30,7 @@ export const otherPlaylistsSelector = selector({
 
     return playlists.filter(
       (playlist) =>
-        !(playlist.all_tracks || []).includes(currentTrack.id) &&
+        !playlist.all_tracks.some((track) => track.id === currentTrack.id) &&
         !removedIds.includes(playlist.id)
     );
   },

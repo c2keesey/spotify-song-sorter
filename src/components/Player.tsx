@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayback } from "@/hooks/usePlayback";
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   DoubleArrowLeftIcon,
   DoubleArrowRightIcon,
   PauseIcon,
@@ -149,7 +151,7 @@ export function Player() {
             title="Rewind 5 seconds"
           >
             <div className="relative">
-              <DoubleArrowLeftIcon className="h-4 w-4" />
+              <ChevronLeftIcon className="h-4 w-4" />
               <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
                 5
               </span>
@@ -194,7 +196,7 @@ export function Player() {
             title="Forward 5 seconds"
           >
             <div className="relative">
-              <DoubleArrowRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-4 w-4" />
               <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
                 5
               </span>
