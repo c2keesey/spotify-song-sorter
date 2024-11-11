@@ -1,13 +1,16 @@
+import { keyBindingsState } from "@/atoms/keyBindingsAtom";
 import { playbackState } from "@/atoms/playbackAtom";
 import { currentPlaylistState } from "@/atoms/playlistAtom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayback } from "@/hooks/usePlayback";
 import {
-  CaretLeftIcon,
-  CaretRightIcon,
+  DoubleArrowLeftIcon,
+  DoubleArrowRightIcon,
   PauseIcon,
   PlayIcon,
+  TrackNextIcon,
+  TrackPreviousIcon,
 } from "@radix-ui/react-icons";
 import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
@@ -15,6 +18,7 @@ import { useRecoilValue } from "recoil";
 export function Player() {
   const currentPlaylist = useRecoilValue(currentPlaylistState);
   const playback = useRecoilValue(playbackState);
+  const keyBindings = useRecoilValue(keyBindingsState);
   const { togglePlayback, seek, skipToNext, skipToPrevious } = usePlayback();
 
   const { isPlaying, track, position, duration } = playback;
@@ -24,33 +28,54 @@ export function Player() {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
 
-      switch (event.code) {
-        case "Space":
-          event.preventDefault();
+      const binding = keyBindings.find(
+        (kb) =>
+          kb.code === event.code &&
+          (!kb.requiresShift || (kb.requiresShift && event.shiftKey))
+      );
+
+      if (!binding) return;
+
+      event.preventDefault();
+
+      switch (binding.action) {
+        case "togglePlayback":
           togglePlayback();
           break;
-        case "ArrowRight":
-          event.preventDefault();
-          seek(position + 5000); // Skip forward 5s
+        case "seekBackward":
+          seek(position - 5000);
           break;
-        case "ArrowLeft":
-          event.preventDefault();
-          seek(position - 5000); // Skip backward 5s
+        case "seekForward":
+          seek(position + 5000);
           break;
-        case "KeyN":
-          event.preventDefault();
+        case "seekBackward30":
+          seek(position - 30000);
+          break;
+        case "seekForward30":
+          seek(position + 30000);
+          break;
+        case "nextTrack":
+          console.log("nextTrack");
           skipToNext();
+          break;
+        case "previousTrack":
+          skipToPrevious();
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [togglePlayback, seek, skipToNext, position]);
+  }, [keyBindings, togglePlayback, seek, skipToNext, skipToPrevious, position]);
 
   if (!currentPlaylist) {
     return null;
   }
+
+  const handleSeek = (seconds: number) => {
+    const newPosition = position + seconds * 1000;
+    seek(Math.max(0, Math.min(newPosition, duration)));
+  };
 
   return (
     <div className="space-y-4 flex-shrink-0">
@@ -103,10 +128,40 @@ export function Player() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => handleSeek(-30)}
+            aria-label="Rewind 30 seconds"
+            title="Rewind 30 seconds"
+          >
+            <div className="relative">
+              <DoubleArrowLeftIcon className="h-4 w-4" />
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
+                30
+              </span>
+            </div>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleSeek(-5)}
+            aria-label="Rewind 5 seconds"
+            title="Rewind 5 seconds"
+          >
+            <div className="relative">
+              <DoubleArrowLeftIcon className="h-4 w-4" />
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
+                5
+              </span>
+            </div>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={skipToPrevious}
             aria-label="Previous track"
           >
-            <CaretLeftIcon className="h-4 w-4" />
+            <TrackPreviousIcon className="h-4 w-4" />
           </Button>
 
           <Button
@@ -127,7 +182,37 @@ export function Player() {
             onClick={skipToNext}
             aria-label="Next track"
           >
-            <CaretRightIcon className="h-4 w-4" />
+            <TrackNextIcon className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleSeek(5)}
+            aria-label="Forward 5 seconds"
+            title="Forward 5 seconds"
+          >
+            <div className="relative">
+              <DoubleArrowRightIcon className="h-4 w-4" />
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
+                5
+              </span>
+            </div>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleSeek(30)}
+            aria-label="Forward 30 seconds"
+            title="Forward 30 seconds"
+          >
+            <div className="relative">
+              <DoubleArrowRightIcon className="h-4 w-4" />
+              <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[10px]">
+                30
+              </span>
+            </div>
           </Button>
         </div>
       </div>

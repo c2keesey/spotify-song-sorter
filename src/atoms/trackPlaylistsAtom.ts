@@ -1,5 +1,5 @@
 import { selector } from "recoil";
-import { playbackState } from "./playbackAtom";
+import { playbackState, removedPlaylistsState } from "./playbackAtom";
 import { playlistsState } from "./playlistAtom";
 
 export const trackPlaylistsSelector = selector({
@@ -7,11 +7,14 @@ export const trackPlaylistsSelector = selector({
   get: ({ get }) => {
     const playlists = get(playlistsState);
     const currentTrack = get(playbackState).track;
+    const removedIds = get(removedPlaylistsState);
 
     if (!currentTrack) return [];
 
-    return playlists.filter((playlist) =>
-      playlist.all_tracks.includes(currentTrack.id)
+    return playlists.filter(
+      (playlist) =>
+        playlist.all_tracks.includes(currentTrack.id) &&
+        !removedIds.includes(playlist.id)
     );
   },
 });
@@ -21,11 +24,14 @@ export const otherPlaylistsSelector = selector({
   get: ({ get }) => {
     const playlists = get(playlistsState);
     const currentTrack = get(playbackState).track;
+    const removedIds = get(removedPlaylistsState);
 
     if (!currentTrack) return [];
 
     return playlists.filter(
-      (playlist) => !playlist.all_tracks.includes(currentTrack.id)
+      (playlist) =>
+        !(playlist.all_tracks || []).includes(currentTrack.id) &&
+        !removedIds.includes(playlist.id)
     );
   },
 });

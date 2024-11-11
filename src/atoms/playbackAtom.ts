@@ -16,3 +16,9 @@ export const playbackState = atom<PlaybackState>({
     duration: 0,
   },
 });
+
+// New atom for removed playlists
+export const removedPlaylistsState = atom<string[]>({
+  key: "removedPlaylistsState",
+  default: [],
+});

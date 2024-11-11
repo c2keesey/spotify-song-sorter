@@ -1,10 +1,11 @@
-import { playbackState } from "@/atoms/playbackAtom";
+import { playbackState, removedPlaylistsState } from "@/atoms/playbackAtom";
 import { SPOTIFY_API, pause, play, seek as seekTrack } from "@/spotify_utils";
 import { useCallback, useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 export function usePlayback() {
   const [playback, setPlayback] = useRecoilState(playbackState);
+  const setRemovedPlaylists = useSetRecoilState(removedPlaylistsState);
 
   const updatePlaybackState = useCallback(async () => {
     try {
@@ -65,15 +66,17 @@ export function usePlayback() {
   const skipToNext = useCallback(async () => {
     try {
       await SPOTIFY_API.skipToNext();
+      setRemovedPlaylists([]);
       setTimeout(updatePlaybackState, 300);
     } catch (error) {
       console.error("Skip error:", error);
     }
-  }, [updatePlaybackState]);
+  }, [updatePlaybackState, setRemovedPlaylists]);
 
   const skipToPrevious = useCallback(async () => {
     try {
       await SPOTIFY_API.skipToPrevious();
+      setRemovedPlaylists([]);
       setTimeout(updatePlaybackState, 300);
     } catch (error) {
       console.error("Skip error:", error);
