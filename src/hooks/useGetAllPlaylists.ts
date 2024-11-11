@@ -1,4 +1,4 @@
-import { playlistsState } from "@/atoms/playlistAtom";
+import { playlistsState, Track } from "@/atoms/playlistAtom";
 import { useSpotify } from "@/hooks/useSpotify";
 import { getPlaylistTracks, getUserPlaylists } from "@/spotify_utils";
 import { useEffect, useState } from "react";
@@ -32,10 +32,48 @@ export function useGetAllPlaylists() {
         // Fetch tracks for each playlist
         const playlistsWithTracks = await Promise.all(
           userPlaylists.map(async (playlist) => {
-            const tracks = await getPlaylistTracks(playlist.id);
+            const trackData = await getPlaylistTracks(playlist.id);
+            const tracks = trackData
+              .map((item) => {
+                const track = item.track;
+                if (!track) return null;
+
+                return {
+                  id: track.id,
+                  name: track.name,
+                  album: {
+                    name: track.album.name,
+                  },
+                  artists: track.artists.map((artist) => ({
+                    name: artist.name,
+                  })),
+                  genres: track.genres || [],
+                } as Track;
+              })
+              .filter((track): track is Track => track !== null);
+
+            // Convert genres tracking from Map to sorted array with counts
+            const genresMap = new Map<string, number>();
+            tracks.forEach((track) => {
+              if (track.genres) {
+                track.genres.forEach((genre) => {
+                  genresMap.set(genre, (genresMap.get(genre) || 0) + 1);
+                });
+              }
+            });
+
+            // Convert Map to array of objects and sort by count
+            const genresList = Array.from(genresMap.entries()).map(
+              ([name, count]) => ({
+                name,
+                count,
+              })
+            );
+
             return {
               id: playlist.id,
               name: playlist.name,
+              images: playlist.images,
               imageUrl: playlist.images?.[0]?.url,
               description: playlist.description || undefined,
               owner: {
@@ -43,7 +81,8 @@ export function useGetAllPlaylists() {
                 displayName: playlist.owner.display_name || "",
               },
               num_tracks: playlist.tracks.total,
-              all_tracks: tracks.map((track) => track.track?.id || ""),
+              all_tracks: tracks,
+              genres: genresList,
             };
           })
         );

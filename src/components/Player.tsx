@@ -102,8 +102,9 @@ export function Player() {
             {currentPlaylist.num_tracks > 0 && (
               <span>
                 Track{" "}
-                {currentPlaylist.all_tracks.findIndex((t) => t === track?.id) +
-                  1}{" "}
+                {currentPlaylist.all_tracks.findIndex(
+                  (t) => t.id === track?.id
+                ) + 1}{" "}
                 of {currentPlaylist.num_tracks}
               </span>
             )}

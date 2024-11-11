@@ -30,8 +30,8 @@ export const defaultKeyBindings: KeyBinding[] = [
   },
   {
     action: "seekBackward30",
-    key: "Z",
-    code: "KeyZ",
+    key: "C",
+    code: "KeyC",
     description: "Rewind 30 seconds",
   },
   {
@@ -42,14 +42,14 @@ export const defaultKeyBindings: KeyBinding[] = [
   },
   {
     action: "nextTrack",
-    key: "A",
-    code: "KeyA",
+    key: "F",
+    code: "KeyF",
     description: "Next track",
   },
   {
     action: "previousTrack",
-    key: "C",
-    code: "KeyC",
+    key: "V",
+    code: "KeyV",
     description: "Previous track",
   },
   {

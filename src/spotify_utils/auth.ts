@@ -1,3 +1,7 @@
+import { Buffer } from "buffer";
+// Add this line at the very top of the file, before other imports
+globalThis.Buffer = Buffer;
+
 import { SPOTIFY_API } from "./config";
 
 // Generate a random string for state

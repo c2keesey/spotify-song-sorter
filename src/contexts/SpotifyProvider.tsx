@@ -83,7 +83,7 @@ export function SpotifyProvider({ children }: { children: React.ReactNode }) {
           setIsAuthenticated(false);
           setUser(null);
         }
-      }, 3000000); // Refresh every 50 minutes
+      }, 300000); // Refresh every 5 minutes
 
       return () => clearInterval(refreshToken);
     }

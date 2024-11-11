@@ -162,7 +162,7 @@ export function OtherPlaylists({ className }: Props) {
               <div className="bg-muted/50 rounded-lg p-6 hover:bg-muted/70 transition-colors">
                 <PlaylistCard
                   key={filteredPlaylists[0].id}
-                  playlist={filteredPlaylists[0]}
+                  playlistId={filteredPlaylists[0].id}
                   onClick={() => handleAddToPlaylist(filteredPlaylists[0].id)}
                   size="large"
                   actions={
@@ -185,13 +185,8 @@ export function OtherPlaylists({ className }: Props) {
               {filteredPlaylists.slice(1).map((playlist) => (
                 <PlaylistCard
                   key={playlist.id}
-                  playlist={playlist}
+                  playlistId={playlist.id}
                   onClick={() => handleAddToPlaylist(playlist.id)}
-                  actions={
-                    <Badge variant="secondary" className="shrink-0">
-                      {playlist.num_tracks} tracks
-                    </Badge>
-                  }
                 />
               ))}
             </div>

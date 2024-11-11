@@ -1,4 +1,5 @@
 import { SPOTIFY_API } from "./config";
+import { enqueueRequest } from "./rateLimiter";
 
 export const play = async (options?: {
   context_uri?: string;
@@ -23,19 +24,16 @@ export const play = async (options?: {
   const url = `https://api.spotify.com/v1/me/player/play?device_id=${device_id}`;
 
   try {
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: options ? JSON.stringify(options) : undefined,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Playback failed: ${error.error.message}`);
-    }
+    await enqueueRequest(() =>
+      fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: options ? JSON.stringify(options) : undefined,
+      })
+    );
   } catch (error) {
     console.error("Playback error:", error);
     throw error;
@@ -44,7 +42,7 @@ export const play = async (options?: {
 
 export const pause = async () => {
   try {
-    await SPOTIFY_API.pause();
+    await enqueueRequest(() => SPOTIFY_API.pause());
   } catch (error) {
     console.error("Pause error:", error);
     throw error;
@@ -53,7 +51,7 @@ export const pause = async () => {
 
 export const seek = async (position_ms: number) => {
   try {
-    await SPOTIFY_API.seek(position_ms);
+    await enqueueRequest(() => SPOTIFY_API.seek(position_ms));
   } catch (error) {
     console.error("Seek error:", error);
     throw error;
