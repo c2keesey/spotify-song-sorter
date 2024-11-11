@@ -1,6 +1,5 @@
 import { playbackState } from "@/atoms/playbackAtom";
 import { trackPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -54,13 +53,9 @@ export function TrackPlaylists() {
             {playlists.map((playlist) => (
               <PlaylistCard
                 key={playlist.id}
-                playlist={playlist}
+                playlistId={playlist.id}
                 onClick={() => handleRemoveFromPlaylist(playlist.id)}
-                actions={
-                  <Badge variant="secondary">
-                    {playlist.num_tracks} tracks
-                  </Badge>
-                }
+                variant="added"
               />
             ))}
           </div>

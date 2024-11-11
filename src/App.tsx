@@ -40,10 +40,10 @@ function App() {
       <Header user={user} logout={logout} />
       <div className="grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-6 flex-1 min-h-0">
         <div className="space-y-6 min-h-0 overflow-hidden flex flex-col">
-          <Player className="flex-shrink-0" />
+          <Player />
           <OtherPlaylists className="flex-1 overflow-auto" />
         </div>
-        <TrackPlaylists className="overflow-auto" />
+        <TrackPlaylists />
       </div>
     </main>
   );

@@ -16,7 +16,25 @@ const GENRE_COLORS = {
   electronic: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
   jazz: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
   classical: "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20",
-  // Add more genres as needed
+  metal: "bg-slate-700/10 text-slate-700 hover:bg-slate-700/20",
+  indie: "bg-violet-500/10 text-violet-500 hover:bg-violet-500/20",
+  folk: "bg-amber-600/10 text-amber-600 hover:bg-amber-600/20",
+  blues: "bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20",
+  country: "bg-brown-500/10 text-brown-500 hover:bg-brown-500/20",
+  soul: "bg-rose-600/10 text-rose-600 hover:bg-rose-600/20",
+  rnb: "bg-fuchsia-500/10 text-fuchsia-500 hover:bg-fuchsia-500/20",
+  reggae: "bg-green-600/10 text-green-600 hover:bg-green-600/20",
+  latin: "bg-orange-600/10 text-orange-600 hover:bg-orange-600/20",
+  punk: "bg-red-700/10 text-red-700 hover:bg-red-700/20",
+  alternative: "bg-purple-600/10 text-purple-600 hover:bg-purple-600/20",
+  edm: "bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500/20",
+  house: "bg-sky-500/10 text-sky-500 hover:bg-sky-500/20",
+  techno: "bg-blue-600/10 text-blue-600 hover:bg-blue-600/20",
+  lofi: "bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20",
+  dub: "bg-blue-700/10 text-blue-700 hover:bg-blue-700/20",
+  dubstep: "bg-violet-700/10 text-violet-700 hover:bg-violet-700/20",
+  "drum and bass": "bg-blue-800/10 text-blue-800 hover:bg-blue-800/20",
+  dnb: "bg-blue-800/10 text-blue-800 hover:bg-blue-800/20",
 } as const;
 
 export function GenreTag({ name, count, maxCount, className }: GenreTagProps) {
@@ -31,9 +49,10 @@ export function GenreTag({ name, count, maxCount, className }: GenreTagProps) {
       className={cn(
         "transition-all",
         baseColor,
-        !baseColor && `opacity-${Math.floor(normalizedCount * 100)}`,
+        !baseColor && "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20",
         className
       )}
+      style={{ opacity: normalizedCount }}
     >
       {name} ({count})
     </Badge>
