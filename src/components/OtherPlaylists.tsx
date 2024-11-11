@@ -29,6 +29,28 @@ export function OtherPlaylists({ className }: Props) {
     removedPlaylistsState
   );
 
+  const handleAddToPlaylist = async (playlistId: string) => {
+    if (!currentTrack) return;
+
+    try {
+      setAddingToPlaylist(playlistId);
+      await addTrackToPlaylist(playlistId, currentTrack.id);
+      setPlaylistHistory((prev) => [
+        {
+          type: "add",
+          trackId: currentTrack.id,
+          playlistId: playlistId,
+          timestamp: Date.now(),
+        },
+        ...prev,
+      ]);
+    } catch (error) {
+      console.error("Failed to add track to playlist:", error);
+    } finally {
+      setAddingToPlaylist(null);
+    }
+  };
+
   useEffect(() => {
     const handleKeyPress = async (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement) return;
@@ -137,14 +159,17 @@ export function OtherPlaylists({ className }: Props) {
           <div className="space-y-4 p-6">
             {/* First playlist highlighted */}
             {filteredPlaylists[0] && (
-              <div className="bg-muted/50 rounded-lg p-4 hover:bg-muted/70 transition-colors">
+              <div className="bg-muted/50 rounded-lg p-6 hover:bg-muted/70 transition-colors">
                 <PlaylistCard
                   key={filteredPlaylists[0].id}
                   playlist={filteredPlaylists[0]}
                   onClick={() => handleAddToPlaylist(filteredPlaylists[0].id)}
-                  className="text-lg"
+                  size="large"
                   actions={
-                    <Badge variant="secondary" className="shrink-0 text-base">
+                    <Badge
+                      variant="secondary"
+                      className="shrink-0 text-lg py-1"
+                    >
                       {filteredPlaylists[0].num_tracks} tracks
                     </Badge>
                   }

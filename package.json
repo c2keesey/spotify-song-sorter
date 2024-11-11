@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "bun --bun vite",
+    "build": "bun --bun vite build",
+    "preview": "bun --bun vite preview",
+    "lint": "bun --bun eslint ."
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",

@@ -8,10 +8,10 @@ export function useGetAllPlaylists() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const setAllPlaylists = useSetRecoilState(playlistsState);
-  const { isAuthenticated } = useSpotify();
+  const { isAuthenticated, user } = useSpotify();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       setIsLoading(false);
       return;
     }
@@ -24,9 +24,14 @@ export function useGetAllPlaylists() {
         // Get all playlists
         const playlists = await getUserPlaylists();
 
+        // Filter playlists to only include those created by the current user
+        const userPlaylists = playlists.filter(
+          (playlist) => playlist.owner.id === user.id
+        );
+
         // Fetch tracks for each playlist
         const playlistsWithTracks = await Promise.all(
-          playlists.map(async (playlist) => {
+          userPlaylists.map(async (playlist) => {
             const tracks = await getPlaylistTracks(playlist.id);
             return {
               id: playlist.id,
@@ -56,7 +61,7 @@ export function useGetAllPlaylists() {
     };
 
     fetchAllPlaylists();
-  }, [isAuthenticated, setAllPlaylists]);
+  }, [isAuthenticated, user, setAllPlaylists]);
 
   return { isLoading, error };
 }
