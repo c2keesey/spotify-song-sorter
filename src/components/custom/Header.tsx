@@ -7,8 +7,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/types/spotify";
-import { ExitIcon, GearIcon, PersonIcon } from "@radix-ui/react-icons";
+import {
+  ExitIcon,
+  GearIcon,
+  ListBulletIcon,
+  PersonIcon,
+} from "@radix-ui/react-icons";
 import { useState } from "react";
+import { PlaylistSelector } from "./PlaylistSelector";
 import { SettingsDialog } from "./SettingsDialog";
 
 interface HeaderProps {
@@ -18,11 +24,21 @@ interface HeaderProps {
 
 export function Header({ user, logout }: HeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
+  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
   return (
     <div className="flex items-center justify-between mb-4">
       <h1 className="text-4xl font-bold">Spotify Song Sorter</h1>
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => setShowPlaylistSelector(true)}
+        >
+          <ListBulletIcon className="w-4 h-4" />
+          Change Playlist
+        </Button>
         <Button
           variant="ghost"
           size="icon"
@@ -69,6 +85,12 @@ export function Header({ user, logout }: HeaderProps) {
         </DropdownMenu>
       </div>
       <SettingsDialog open={showSettings} onOpenChange={setShowSettings} />
+      {showPlaylistSelector && (
+        <PlaylistSelector
+          open={showPlaylistSelector}
+          onOpenChange={setShowPlaylistSelector}
+        />
+      )}
     </div>
   );
 }

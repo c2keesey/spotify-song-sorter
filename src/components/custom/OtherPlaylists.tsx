@@ -1,22 +1,30 @@
 import { keyBindingsState } from "@/atoms/keyBindingsAtom";
 import { playbackState, removedPlaylistsState } from "@/atoms/playbackAtom";
+import { PlaylistWithTracks } from "@/atoms/playlistAtom";
 import {
   PlaylistAction,
   playlistHistoryState,
 } from "@/atoms/playlistHistoryAtom";
+import { currentRankerState } from "@/atoms/rankingAtom";
 import { otherPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { useAddTrackToPlaylist } from "@/hooks/useAddTrackToPlaylist";
 import { useRemoveTrackFromPlaylist } from "@/hooks/useRemoveTrackFromPlaylist";
+import { GenreMatchRanker } from "@/ranking/algorithms/GenreMatchRanker";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PlaylistCard } from "./PlaylistCard";
 
 interface Props {
   className?: string;
+}
+
+interface PlaylistScore {
+  playlistId: string;
+  score: number;
 }
 
 export function OtherPlaylists({ className }: Props) {
@@ -31,6 +39,14 @@ export function OtherPlaylists({ className }: Props) {
   const [removedPlaylists, setRemovedPlaylists] = useRecoilState(
     removedPlaylistsState
   );
+  const currentRanker = useRecoilValue(currentRankerState);
+  const playbackData = useRecoilValue(playbackState);
+  const [rankedPlaylists, setRankedPlaylists] = useState<PlaylistWithTracks[]>(
+    []
+  );
+  const [isRanking, setIsRanking] = useState(false);
+  const [rankingError, setRankingError] = useState<boolean>(false);
+  const [playlistScores, setPlaylistScores] = useState<PlaylistScore[]>([]);
 
   const handleAddToPlaylist = async (playlistId: string) => {
     if (!currentTrack) return;
@@ -154,6 +170,50 @@ export function OtherPlaylists({ className }: Props) {
 
   const filteredPlaylists = playlists;
 
+  // Move ranking logic to a useEffect
+  useEffect(() => {
+    const rankPlaylists = async () => {
+      if (!playbackData.track || !filteredPlaylists.length || rankingError)
+        return;
+
+      setIsRanking(true);
+      try {
+        const rankingContext = {
+          currentTrack: playbackData.track,
+        };
+
+        const { playlists: ranked, genres: currentTrackGenres } =
+          await currentRanker.rankPlaylists(filteredPlaylists, rankingContext);
+
+        if (currentRanker instanceof GenreMatchRanker) {
+          const scores = ranked.map((playlist) => ({
+            playlistId: playlist.id,
+            score: currentRanker.calculateGenreMatchScore(
+              playlist,
+              currentTrackGenres
+            ),
+          }));
+          setPlaylistScores(scores);
+        }
+
+        setRankedPlaylists((prevRanked) => {
+          const hasChanged =
+            JSON.stringify(prevRanked) !== JSON.stringify(ranked);
+          return hasChanged ? ranked : prevRanked;
+        });
+        setRankingError(false);
+      } catch (error) {
+        console.error("Error ranking playlists:", error);
+        setRankedPlaylists(filteredPlaylists);
+        setRankingError(true);
+      } finally {
+        setIsRanking(false);
+      }
+    };
+
+    rankPlaylists();
+  }, [playbackData.track?.id, filteredPlaylists.length, currentRanker]);
+
   if (filteredPlaylists.length === 0) {
     return null;
   }
@@ -163,39 +223,63 @@ export function OtherPlaylists({ className }: Props) {
       <CardContent className="p-0 h-full">
         <ScrollArea className="h-full">
           <div className="space-y-4 p-6">
-            {/* First playlist highlighted */}
-            {filteredPlaylists[0] && (
-              <div className="bg-muted/50 rounded-lg p-6 hover:bg-muted/70 transition-colors">
-                <PlaylistCard
-                  key={filteredPlaylists[0].id}
-                  playlistId={filteredPlaylists[0].id}
-                  onClick={() => handleAddToPlaylist(filteredPlaylists[0].id)}
-                  size="large"
-                  actions={
-                    <Badge
-                      variant="secondary"
-                      className="shrink-0 text-lg py-1"
-                    >
-                      {filteredPlaylists[0].num_tracks} tracks
-                    </Badge>
-                  }
-                />
+            {isRanking ? (
+              <div className="flex items-center justify-center p-4 gap-2">
+                <Spinner className="h-4 w-4" />
+                <span className="text-sm text-muted-foreground">
+                  Ranking playlists...
+                </span>
               </div>
+            ) : rankingError ? (
+              <div className="space-y-2">
+                {filteredPlaylists.map((playlist) => (
+                  <PlaylistCard
+                    key={playlist.id}
+                    playlistId={playlist.id}
+                    onClick={() => handleAddToPlaylist(playlist.id)}
+                    variant="ready"
+                  />
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* First playlist highlighted */}
+                {rankedPlaylists[0] && (
+                  <div className="bg-muted/50 rounded-lg p-6 hover:bg-muted/70 transition-colors">
+                    <PlaylistCard
+                      key={rankedPlaylists[0].id}
+                      playlistId={rankedPlaylists[0].id}
+                      onClick={() => handleAddToPlaylist(rankedPlaylists[0].id)}
+                      variant="focus"
+                      score={
+                        playlistScores.find(
+                          (s) => s.playlistId === rankedPlaylists[0].id
+                        )?.score
+                      }
+                    />
+                  </div>
+                )}
+
+                {/* Separator between first and rest */}
+                {rankedPlaylists.length > 1 && <Separator className="my-4" />}
+
+                {/* Rest of the playlists */}
+                <div className="space-y-2">
+                  {rankedPlaylists.slice(1).map((playlist) => (
+                    <PlaylistCard
+                      key={playlist.id}
+                      playlistId={playlist.id}
+                      onClick={() => handleAddToPlaylist(playlist.id)}
+                      variant="ready"
+                      score={
+                        playlistScores.find((s) => s.playlistId === playlist.id)
+                          ?.score
+                      }
+                    />
+                  ))}
+                </div>
+              </>
             )}
-
-            {/* Separator between first and rest */}
-            {filteredPlaylists.length > 1 && <Separator className="my-4" />}
-
-            {/* Rest of the playlists */}
-            <div className="space-y-2">
-              {filteredPlaylists.slice(1).map((playlist) => (
-                <PlaylistCard
-                  key={playlist.id}
-                  playlistId={playlist.id}
-                  onClick={() => handleAddToPlaylist(playlist.id)}
-                />
-              ))}
-            </div>
           </div>
         </ScrollArea>
       </CardContent>

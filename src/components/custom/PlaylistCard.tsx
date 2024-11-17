@@ -1,4 +1,6 @@
+import { playbackState } from "@/atoms/playbackAtom";
 import { playlistsState } from "@/atoms/playlistAtom";
+import { currentRankerState } from "@/atoms/rankingAtom";
 import { cn } from "@/lib/utils";
 import { useRecoilValue } from "recoil";
 import { GenreTag } from "./GenreTag";
@@ -8,6 +10,7 @@ interface PlaylistCardProps {
   onClick?: () => void;
   className?: string;
   variant: "focus" | "ready" | "added";
+  score?: number;
 }
 
 export function PlaylistCard({
@@ -15,9 +18,12 @@ export function PlaylistCard({
   onClick,
   className,
   variant = "ready",
+  score,
 }: PlaylistCardProps) {
   const playlists = useRecoilValue(playlistsState);
   const playlist = playlists.find((p) => p.id === playlistId);
+  const playbackData = useRecoilValue(playbackState);
+  const currentRanker = useRecoilValue(currentRankerState);
 
   if (!playlist) return null;
 
@@ -60,6 +66,11 @@ export function PlaylistCard({
                   )}
                 >
                   · {playlist.num_tracks} tracks
+                  {score !== undefined && score > 0 && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      · Match: {score.toFixed(0)}%
+                    </span>
+                  )}
                 </span>
               )}
             </h4>

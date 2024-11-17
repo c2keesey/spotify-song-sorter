@@ -22,11 +22,17 @@ import {
 
 import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
 import { SPOTIFY_API, waitForSpotifyDevice } from "@/spotify_utils";
-import { useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
-export function PlaylistSelector() {
-  const [open, setOpen] = useState(true);
+interface PlaylistSelectorProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function PlaylistSelector({
+  open,
+  onOpenChange,
+}: PlaylistSelectorProps) {
   const playlists = useRecoilValue(playlistsState);
   const setCurrentPlaylistId = useSetRecoilState(currentPlaylistIdState);
   const { isLoading, error } = useGetAllPlaylists();
@@ -46,11 +52,11 @@ export function PlaylistSelector() {
     } catch (error) {
       console.error("Error starting playlist playback:", error);
     }
-    setOpen(false);
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Select a Playlist</DialogTitle>
@@ -104,7 +110,7 @@ export function PlaylistSelector() {
 
         <Button
           variant="outline"
-          onClick={() => setOpen(false)}
+          onClick={() => onOpenChange(false)}
           className="mt-2"
         >
           Cancel
