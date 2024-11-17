@@ -53,11 +53,16 @@ module.exports = {
       },
       animation: {
         loader: "loader 0.75s ease-in-out infinite",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
       },
       keyframes: {
         loader: {
           "0%, 100%": { opacity: "0.2" },
           "50%": { opacity: "1" },
+        },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
         },
       },
     },

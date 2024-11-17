@@ -6,6 +6,7 @@ interface GenreTagProps {
   count: number;
   maxCount: number;
   className?: string;
+  isMatching?: boolean;
 }
 
 const GENRE_COLORS = {
@@ -47,24 +48,43 @@ const GENRE_COLORS = {
   synthwave: "bg-pink-400/10 text-pink-400 hover:bg-pink-400/20",
 } as const;
 
-export function GenreTag({ name, count, maxCount, className }: GenreTagProps) {
+export function GenreTag({
+  name,
+  count,
+  maxCount,
+  className,
+  isMatching = false,
+}: GenreTagProps) {
   const normalizedCount = Math.max(0.4, count / maxCount);
   const baseColor = Object.entries(GENRE_COLORS).find(([key]) =>
     name.toLowerCase().includes(key)
   )?.[1];
 
   return (
-    <Badge
-      variant="secondary"
-      className={cn(
-        "transition-all",
-        baseColor,
-        !baseColor && "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20",
-        className
+    <div className="relative inline-flex">
+      {isMatching && (
+        <div
+          className={cn(
+            "absolute inset-0 rounded-full transition-all animate-[pulse-subtle_2s_ease-in-out_infinite]",
+            baseColor?.replace("bg", "ring").replace("hover:bg", "ring"),
+            !baseColor && "ring-gray-500",
+            "ring-2 ring-offset-1 ring-offset-background"
+          )}
+        />
       )}
-      style={{ opacity: normalizedCount }}
-    >
-      {name} ({count})
-    </Badge>
+
+      <Badge
+        variant="secondary"
+        className={cn(
+          "relative transition-all",
+          baseColor,
+          !baseColor && "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20",
+          className
+        )}
+        style={{ opacity: normalizedCount }}
+      >
+        {name} ({count})
+      </Badge>
+    </div>
   );
 }
