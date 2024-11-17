@@ -1,13 +1,13 @@
 import { currentPlaylistIdState } from "@/atoms/playlistAtom";
-import { Header } from "@/components/Header";
-import { OtherPlaylists } from "@/components/OtherPlaylists";
-import { Player } from "@/components/Player";
-import { PlaylistSelector } from "@/components/PlaylistSelector";
+import { Header } from "@/components/custom/Header";
+import { OtherPlaylists } from "@/components/custom/OtherPlaylists";
+import { Player } from "@/components/custom/Player";
+import { PlaylistSelector } from "@/components/custom/PlaylistSelector";
+import { TrackPlaylists } from "@/components/custom/TrackPlaylists";
 import { Button } from "@/components/ui/button";
 import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
 import { useSpotify } from "@/hooks/useSpotify";
 import { useRecoilValue } from "recoil";
-import { TrackPlaylists } from "./components/TrackPlaylists";
 
 function App() {
   const { isAuthenticated, login, logout, user } = useSpotify();

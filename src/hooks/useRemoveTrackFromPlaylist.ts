@@ -1,43 +1,39 @@
 import { playlistsState } from "@/atoms/playlistAtom";
-import { SPOTIFY_API } from "@/spotify_utils/config";
-import { useCallback } from "react";
-import { useSetRecoilState } from "recoil";
+import { SPOTIFY_API } from "@/spotify_utils";
+import { useRecoilState } from "recoil";
 
 export function useRemoveTrackFromPlaylist() {
-  const setPlaylists = useSetRecoilState(playlistsState);
+  const [playlists, setPlaylists] = useRecoilState(playlistsState);
 
-  const removeTrackFromPlaylist = useCallback(
-    async (playlistId: string, trackId: string) => {
-      try {
-        // Ensure the trackId is valid before making the API call
-        if (!trackId || typeof trackId !== "string") {
-          throw new Error("Invalid track ID");
-        }
+  const removeTrackFromPlaylist = async (
+    playlistId: string,
+    trackId: string
+  ) => {
+    try {
+      await SPOTIFY_API.removeTracksFromPlaylist(playlistId, [
+        { uri: `spotify:track:${trackId}` },
+      ]);
 
-        await SPOTIFY_API.removeTracksFromPlaylist(playlistId, [
-          { uri: `spotify:track:${trackId}` },
-        ]);
-
-        // Update local state
-        setPlaylists((currentPlaylists) =>
-          currentPlaylists.map((playlist) => {
-            if (playlist.id === playlistId) {
-              return {
-                ...playlist,
-                num_tracks: playlist.num_tracks - 1,
-                all_tracks: playlist.all_tracks.filter((id) => id !== trackId),
-              };
-            }
-            return playlist;
-          })
-        );
-      } catch (error) {
-        console.error("Failed to remove track from playlist:", error);
-        throw error;
-      }
-    },
-    [setPlaylists]
-  );
+      // Update the playlists state
+      setPlaylists(
+        playlists.map((playlist) => {
+          if (playlist.id === playlistId) {
+            return {
+              ...playlist,
+              all_tracks: playlist.all_tracks.filter(
+                (track) => track.id !== trackId
+              ),
+              num_tracks: Math.max(0, playlist.num_tracks - 1),
+            };
+          }
+          return playlist;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to remove track from playlist:", error);
+      throw error;
+    }
+  };
 
   return removeTrackFromPlaylist;
 }

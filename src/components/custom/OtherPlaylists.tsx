@@ -1,16 +1,19 @@
 import { keyBindingsState } from "@/atoms/keyBindingsAtom";
 import { playbackState, removedPlaylistsState } from "@/atoms/playbackAtom";
-import { playlistHistoryState } from "@/atoms/playlistHistoryAtom";
+import {
+  PlaylistAction,
+  playlistHistoryState,
+} from "@/atoms/playlistHistoryAtom";
 import { otherPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { useAddTrackToPlaylist } from "@/hooks/useAddTrackToPlaylist";
 import { useRemoveTrackFromPlaylist } from "@/hooks/useRemoveTrackFromPlaylist";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PlaylistCard } from "./PlaylistCard";
-import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
 
 interface Props {
   className?: string;
@@ -46,6 +49,31 @@ export function OtherPlaylists({ className }: Props) {
       ]);
     } catch (error) {
       console.error("Failed to add track to playlist:", error);
+    } finally {
+      setAddingToPlaylist(null);
+    }
+  };
+
+  const handleUndoAction = async (lastAction: PlaylistAction) => {
+    if (!currentTrack) return;
+
+    try {
+      setAddingToPlaylist(lastAction.playlistId);
+      if (lastAction.type === "add") {
+        await removeTrackFromPlaylist(
+          lastAction.playlistId,
+          lastAction.trackId!
+        );
+      } else if (lastAction.type === "remove") {
+        await addTrackToPlaylist(lastAction.playlistId, lastAction.trackId!);
+      } else if (lastAction.type === "hidePlaylist") {
+        setRemovedPlaylists((prev) =>
+          prev.filter((id) => id !== lastAction.playlistId)
+        );
+      }
+      setPlaylistHistory((prev) => prev.slice(1));
+    } catch (error) {
+      console.error("Failed to undo action:", error);
     } finally {
       setAddingToPlaylist(null);
     }
@@ -104,29 +132,7 @@ export function OtherPlaylists({ className }: Props) {
         case "undoLastAction": {
           const lastAction = playlistHistory[0];
           if (lastAction) {
-            try {
-              setAddingToPlaylist(lastAction.playlistId);
-              if (lastAction.type === "add") {
-                await removeTrackFromPlaylist(
-                  lastAction.playlistId,
-                  lastAction.trackId!
-                );
-              } else if (lastAction.type === "remove") {
-                await addTrackToPlaylist(
-                  lastAction.playlistId,
-                  lastAction.trackId!
-                );
-              } else if (lastAction.type === "hidePlaylist") {
-                setRemovedPlaylists((prev) =>
-                  prev.filter((id) => id !== lastAction.playlistId)
-                );
-              }
-              setPlaylistHistory((prev) => prev.slice(1));
-            } catch (error) {
-              console.error("Failed to undo action:", error);
-            } finally {
-              setAddingToPlaylist(null);
-            }
+            await handleUndoAction(lastAction);
           }
           break;
         }

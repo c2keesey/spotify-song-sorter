@@ -2,7 +2,7 @@ import { SpotifyProvider } from "@/contexts/SpotifyProvider";
 import { createRoot } from "react-dom/client";
 import { RecoilRoot } from "recoil";
 import App from "./App";
-import { WebPlayback } from "./components/WebPlayback";
+import { WebPlayback } from "./components/custom/WebPlayback";
 import "./index.css";
 
 // Force dark mode for the app

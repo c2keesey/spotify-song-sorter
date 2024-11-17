@@ -94,3 +94,36 @@ export const getPlaylistTracks = async (playlistId: string) => {
     throw error;
   }
 };
+
+export const addTracksToPlaylist = async (
+  playlistId: string,
+  uris: string[]
+) => {
+  try {
+    const response = await enqueueRequest(() =>
+      SPOTIFY_API.addTracksToPlaylist(playlistId, uris)
+    );
+    return response.body;
+  } catch (error) {
+    console.error("Add tracks to playlist error:", error);
+    throw error;
+  }
+};
+
+export const removeTracksFromPlaylist = async (
+  playlistId: string,
+  uris: string[]
+) => {
+  try {
+    const response = await enqueueRequest(() =>
+      SPOTIFY_API.removeTracksFromPlaylist(
+        playlistId,
+        uris.map((uri) => ({ uri }))
+      )
+    );
+    return response.body;
+  } catch (error) {
+    console.error("Remove tracks from playlist error:", error);
+    throw error;
+  }
+};

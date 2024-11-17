@@ -1,38 +1,49 @@
 import { playlistsState } from "@/atoms/playlistAtom";
-import { SPOTIFY_API } from "@/spotify_utils/config";
+import { SPOTIFY_API } from "@/spotify_utils";
 import { useCallback } from "react";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 export function useAddTrackToPlaylist() {
-  const setPlaylists = useSetRecoilState(playlistsState);
+  const [playlists, setPlaylists] = useRecoilState(playlistsState);
 
-  const addTrackToPlaylist = useCallback(
-    async (playlistId: string, trackId: string) => {
-      try {
-        await SPOTIFY_API.addTracksToPlaylist(playlistId, [
-          `spotify:track:${trackId}`,
-        ]);
+  const addTrackToPlaylist = async (playlistId: string, trackId: string) => {
+    try {
+      await SPOTIFY_API.addTracksToPlaylist(playlistId, [
+        `spotify:track:${trackId}`,
+      ]);
 
-        // Update local state
-        setPlaylists((currentPlaylists) =>
-          currentPlaylists.map((playlist) => {
-            if (playlist.id === playlistId) {
-              return {
-                ...playlist,
-                num_tracks: playlist.num_tracks + 1,
-                all_tracks: [...playlist.all_tracks, trackId],
-              };
-            }
-            return playlist;
-          })
-        );
-      } catch (error) {
-        console.error("Failed to add track to playlist:", error);
-        throw error;
+      // Find the track details from any playlist that has it
+      const trackDetails = playlists
+        .flatMap((p) => p.all_tracks)
+        .find((t) => t.id === trackId);
+
+      if (!trackDetails) {
+        console.error("Could not find track details");
+        return;
       }
-    },
-    [setPlaylists]
-  );
+
+      // Update the playlists state
+      setPlaylists(
+        playlists.map((playlist) => {
+          if (playlist.id === playlistId) {
+            // Check if track is already in playlist to avoid duplicates
+            if (playlist.all_tracks.some((t) => t.id === trackId)) {
+              return playlist;
+            }
+            return {
+              ...playlist,
+              all_tracks: [...playlist.all_tracks, trackDetails],
+              num_tracks: playlist.num_tracks + 1,
+            };
+          }
+          return playlist;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to add track to playlist:", error);
+      throw error;
+    }
+  };
 
   return addTrackToPlaylist;
 }
