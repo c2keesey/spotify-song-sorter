@@ -8,9 +8,9 @@ import {
 import { currentRankerState } from "@/atoms/rankingAtom";
 import { otherPlaylistsSelector } from "@/atoms/trackPlaylistsAtom";
 import { Card, CardContent } from "@/components/ui/card";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { useAddTrackToPlaylist } from "@/hooks/useAddTrackToPlaylist";
 import { useRemoveTrackFromPlaylist } from "@/hooks/useRemoveTrackFromPlaylist";
 import { GenreMatchRanker } from "@/ranking/algorithms/GenreMatchRanker";
@@ -180,6 +180,7 @@ export function OtherPlaylists({ className }: Props) {
       try {
         const rankingContext = {
           currentTrack: playbackData.track,
+          genres: playbackData.genres,
         };
 
         const { playlists: ranked, genres: currentTrackGenres } =
@@ -225,10 +226,7 @@ export function OtherPlaylists({ className }: Props) {
           <div className="space-y-4 p-6">
             {isRanking ? (
               <div className="flex items-center justify-center p-4 gap-2">
-                <Spinner className="h-4 w-4" />
-                <span className="text-sm text-muted-foreground">
-                  Ranking playlists...
-                </span>
+                <LoadingDots />
               </div>
             ) : rankingError ? (
               <div className="space-y-2">
@@ -238,6 +236,7 @@ export function OtherPlaylists({ className }: Props) {
                     playlistId={playlist.id}
                     onClick={() => handleAddToPlaylist(playlist.id)}
                     variant="ready"
+                    isLoading={addingToPlaylist === playlist.id}
                   />
                 ))}
               </div>
@@ -256,6 +255,7 @@ export function OtherPlaylists({ className }: Props) {
                           (s) => s.playlistId === rankedPlaylists[0].id
                         )?.score
                       }
+                      isLoading={addingToPlaylist === rankedPlaylists[0].id}
                     />
                   </div>
                 )}
@@ -275,6 +275,7 @@ export function OtherPlaylists({ className }: Props) {
                         playlistScores.find((s) => s.playlistId === playlist.id)
                           ?.score
                       }
+                      isLoading={addingToPlaylist === playlist.id}
                     />
                   ))}
                 </div>

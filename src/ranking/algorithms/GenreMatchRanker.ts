@@ -1,5 +1,4 @@
 import type { PlaylistWithTracks } from "@/atoms/playlistAtom";
-import { SPOTIFY_API } from "@/spotify_utils/config";
 import type { PlaylistRanker, RankingContext } from "../types";
 
 export class GenreMatchRanker implements PlaylistRanker {
@@ -16,37 +15,15 @@ export class GenreMatchRanker implements PlaylistRanker {
       return { playlists, genres: [] };
     }
 
-    // Fetch genres for the current track's artists
-    const artistIds = context.currentTrack.artists.map((artist) => artist.id);
-    const genres = new Set<string>();
+    const currentTrackGenres = context.genres || [];
 
-    try {
-      const batchSize = 50;
-      for (let i = 0; i < artistIds.length; i += batchSize) {
-        const batch = artistIds.slice(i, i + batchSize);
-        const artistsResponse = await SPOTIFY_API.getArtists(batch);
+    const sortedPlaylists = [...playlists].sort((a, b) => {
+      const aScore = this.calculateGenreMatchScore(a, currentTrackGenres);
+      const bScore = this.calculateGenreMatchScore(b, currentTrackGenres);
+      return bScore - aScore;
+    });
 
-        artistsResponse.body.artists.forEach((artist) => {
-          artist.genres.forEach((genre) => genres.add(genre));
-        });
-      }
-
-      const currentTrackGenres = Array.from(genres);
-      console.log("Current track genres:", currentTrackGenres);
-
-      const sortedPlaylists = [...playlists].sort((a, b) => {
-        const aScore = this.calculateGenreMatchScore(a, currentTrackGenres);
-        const bScore = this.calculateGenreMatchScore(b, currentTrackGenres);
-        console.log(`Playlist: ${a.name}, Score: ${aScore}`);
-        console.log(`Playlist: ${b.name}, Score: ${bScore}`);
-        return bScore - aScore;
-      });
-
-      return { playlists: sortedPlaylists, genres: currentTrackGenres };
-    } catch (error) {
-      console.error("Error fetching artist genres:", error);
-      return { playlists, genres: [] };
-    }
+    return { playlists: sortedPlaylists, genres: currentTrackGenres };
   }
 
   calculateGenreMatchScore(

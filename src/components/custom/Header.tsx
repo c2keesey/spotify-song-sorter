@@ -6,6 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import { User } from "@/types/spotify";
 import {
   ExitIcon,
@@ -20,9 +21,10 @@ import { SettingsDialog } from "./SettingsDialog";
 interface HeaderProps {
   user?: User;
   logout: () => void;
+  isLoading?: boolean;
 }
 
-export function Header({ user, logout }: HeaderProps) {
+export function Header({ user, logout, isLoading }: HeaderProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
 
@@ -30,22 +32,31 @@ export function Header({ user, logout }: HeaderProps) {
     <div className="flex items-center justify-between mb-4">
       <h1 className="text-4xl font-bold">Spotify Song Sorter</h1>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          onClick={() => setShowPlaylistSelector(true)}
-        >
-          <ListBulletIcon className="w-4 h-4" />
-          Change Playlist
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSettings(true)}
-        >
-          <GearIcon className="w-5 h-5" />
-        </Button>
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <LoadingDots size="sm" />
+            <span className="text-sm text-muted-foreground">Loading...</span>
+          </div>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowPlaylistSelector(true)}
+            >
+              <ListBulletIcon className="w-4 h-4" />
+              Change Playlist
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+            >
+              <GearIcon className="w-5 h-5" />
+            </Button>
+          </>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">

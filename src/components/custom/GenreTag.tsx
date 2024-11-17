@@ -35,6 +35,16 @@ const GENRE_COLORS = {
   dubstep: "bg-violet-700/10 text-violet-700 hover:bg-violet-700/20",
   "drum and bass": "bg-blue-800/10 text-blue-800 hover:bg-blue-800/20",
   dnb: "bg-blue-800/10 text-blue-800 hover:bg-blue-800/20",
+  trance: "bg-blue-400/10 text-blue-400 hover:bg-blue-400/20",
+  downtempo: "bg-teal-500/10 text-teal-500 hover:bg-teal-500/20",
+  "glitch hop": "bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20",
+  psybass: "bg-violet-500/10 text-violet-500 hover:bg-violet-500/20",
+  electro: "bg-cyan-600/10 text-cyan-600 hover:bg-cyan-600/20",
+  bass: "bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20",
+  breakbeat: "bg-sky-600/10 text-sky-600 hover:bg-sky-600/20",
+  ambient: "bg-slate-400/10 text-slate-400 hover:bg-slate-400/20",
+  experimental: "bg-purple-400/10 text-purple-400 hover:bg-purple-400/20",
+  synthwave: "bg-pink-400/10 text-pink-400 hover:bg-pink-400/20",
 } as const;
 
 export function GenreTag({ name, count, maxCount, className }: GenreTagProps) {

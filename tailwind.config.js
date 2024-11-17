@@ -51,6 +51,15 @@ module.exports = {
           5: "hsl(var(--chart-5))",
         },
       },
+      animation: {
+        loader: "loader 0.75s ease-in-out infinite",
+      },
+      keyframes: {
+        loader: {
+          "0%, 100%": { opacity: "0.2" },
+          "50%": { opacity: "1" },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { LoadingDots } from "@/components/ui/loading-dots";
 import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
 import { SPOTIFY_API, waitForSpotifyDevice } from "@/spotify_utils";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -83,8 +84,8 @@ export function PlaylistSelector({
               <CommandEmpty>No playlists found.</CommandEmpty>
               <CommandGroup>
                 {isLoading ? (
-                  <div className="p-4 text-center text-muted-foreground">
-                    Loading playlists...
+                  <div className="flex items-center justify-center p-6">
+                    <LoadingDots />
                   </div>
                 ) : (
                   playlists.map((playlist) => (

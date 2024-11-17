@@ -1,6 +1,7 @@
 import { playbackState } from "@/atoms/playbackAtom";
 import { playlistsState } from "@/atoms/playlistAtom";
 import { currentRankerState } from "@/atoms/rankingAtom";
+import { LoadingDots } from "@/components/ui/loading-dots";
 import { cn } from "@/lib/utils";
 import { useRecoilValue } from "recoil";
 import { GenreTag } from "./GenreTag";
@@ -11,6 +12,7 @@ interface PlaylistCardProps {
   className?: string;
   variant: "focus" | "ready" | "added";
   score?: number;
+  isLoading?: boolean;
 }
 
 export function PlaylistCard({
@@ -19,6 +21,7 @@ export function PlaylistCard({
   className,
   variant = "ready",
   score,
+  isLoading,
 }: PlaylistCardProps) {
   const playlists = useRecoilValue(playlistsState);
   const playlist = playlists.find((p) => p.id === playlistId);
@@ -26,6 +29,19 @@ export function PlaylistCard({
   const currentRanker = useRecoilValue(currentRankerState);
 
   if (!playlist) return null;
+
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          "w-full flex items-center justify-center rounded-lg border p-4",
+          className
+        )}
+      >
+        <LoadingDots size="sm" />
+      </div>
+    );
+  }
 
   return (
     <button

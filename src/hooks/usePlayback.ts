@@ -3,6 +3,26 @@ import { SPOTIFY_API, pause, play, seek as seekTrack } from "@/spotify_utils";
 import { useCallback, useEffect } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 
+const fetchArtistGenres = async (artistIds: string[]): Promise<string[]> => {
+  const genres = new Set<string>();
+  const batchSize = 50;
+
+  try {
+    for (let i = 0; i < artistIds.length; i += batchSize) {
+      const batch = artistIds.slice(i, i + batchSize);
+      const artistsResponse = await SPOTIFY_API.getArtists(batch);
+
+      artistsResponse.body.artists.forEach((artist) => {
+        artist.genres.forEach((genre) => genres.add(genre));
+      });
+    }
+    return Array.from(genres);
+  } catch (error) {
+    console.error("Error fetching artist genres:", error);
+    return [];
+  }
+};
+
 export function usePlayback() {
   const [playback, setPlayback] = useRecoilState(playbackState);
   const setRemovedPlaylists = useSetRecoilState(removedPlaylistsState);
@@ -11,12 +31,17 @@ export function usePlayback() {
     try {
       const state = await SPOTIFY_API.getMyCurrentPlaybackState();
 
-      if (state.body) {
+      if (state.body && state.body.item) {
+        const track = state.body.item as SpotifyApi.TrackObjectFull;
+        const artistIds = track.artists.map((artist) => artist.id);
+        const genres = await fetchArtistGenres(artistIds);
+
         setPlayback({
           isPlaying: state.body.is_playing,
-          track: state.body.item as SpotifyApi.TrackObjectFull,
+          track,
           position: state.body.progress_ms || 0,
           duration: state.body.item?.duration_ms || 0,
+          genres,
         });
       }
     } catch (error) {

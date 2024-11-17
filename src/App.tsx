@@ -5,7 +5,6 @@ import { Player } from "@/components/custom/Player";
 import { PlaylistSelector } from "@/components/custom/PlaylistSelector";
 import { TrackPlaylists } from "@/components/custom/TrackPlaylists";
 import { Button } from "@/components/ui/button";
-import { useGetAllPlaylists } from "@/hooks/useGetAllPlaylists";
 import { useSpotify } from "@/hooks/useSpotify";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -13,7 +12,6 @@ import { useRecoilValue } from "recoil";
 function App() {
   const { isAuthenticated, login, logout, user } = useSpotify();
   const currentPlaylistId = useRecoilValue(currentPlaylistIdState);
-  const { isLoading: isLoadingPlaylists } = useGetAllPlaylists();
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(
     !currentPlaylistId
   );
@@ -29,10 +27,6 @@ function App() {
         </Button>
       </main>
     );
-  }
-
-  if (isLoadingPlaylists) {
-    return <div>Loading playlists...</div>;
   }
 
   if (!currentPlaylistId) {

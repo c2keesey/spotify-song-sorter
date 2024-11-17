@@ -3,6 +3,7 @@ import type { PlaylistWithTracks } from "@/atoms/playlistAtom";
 
 export interface RankingContext {
   currentTrack: PlaybackState["track"];
+  genres: string[];
 }
 
 export interface PlaylistRanker {

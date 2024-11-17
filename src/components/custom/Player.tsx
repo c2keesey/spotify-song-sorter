@@ -16,6 +16,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
+import { GenreTag } from "@/components/custom/GenreTag";
 
 export function Player() {
   const currentPlaylist = useRecoilValue(currentPlaylistState);
@@ -218,6 +219,14 @@ export function Player() {
             </div>
           </Button>
         </div>
+
+        {playback.genres.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center">
+            {playback.genres.map((genre) => (
+              <GenreTag key={genre} name={genre} count={1} maxCount={1} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
